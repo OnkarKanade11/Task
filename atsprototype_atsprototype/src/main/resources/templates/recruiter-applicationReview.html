@@ -1,0 +1,39 @@
+ 
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Application Review</title>
+    <link rel="stylesheet" th:href="@{/css/styles.css}">
+</head>
+<body>
+    <div th:replace="~{fragments :: header}"></div>
+    <h1>Application Review</h1>
+    <h2 th:text="${jobPosting.jobTitle}"></h2>
+    <p th:text="${jobPosting.location}"></p>
+    <p th:text="${jobPosting.salary}"></p>
+    <p th:text="${jobPosting.description}"></p>
+    <h3>Candidate Information</h3>
+    <p th:text="${candidate.firstName + ' ' + candidate.lastName}"></p>
+    <p th:text="${candidate.email}"></p>
+    <a th:href="@{'/candidate/resume/' + ${candidate.id}}">View Resume</a>
+    <h3>R1 Check Form Responses</h3>
+    <ul th:each="question, iter : ${jobPosting.r1CheckQuestions}">
+        <li th:text="${question.question}">
+            <span th:if="${r1Responses[iter.index]}">Yes</span>
+            <span th:unless="${r1Responses[iter.index]}">No</span>
+        </li>
+    </ul>
+    <form th:action="@{/recruiter/review}" th:object="${reviewForm}" method="post">
+		<h3>R2 Check Form</h3>
+		<ul th:each="question, iter : ${jobPosting.r2CheckQuestions}">
+		<li th:text="${question.question}">
+		<input type="radio" th:name="${'r2_' + iter.index}" value="true" required> Yes
+		<input type="radio" th:name="${'r2_' + iter.index}" value="false" required> No
+		</li>
+		</ul>
+		<button type="submit">Submit Review</button>
+	</form>
+	
+</body>
+</html>	

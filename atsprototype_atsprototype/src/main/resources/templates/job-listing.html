@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Job Listings</title>
+    <link rel="stylesheet" th:href="@{/css/styles.css}">
+</head>
+<body>
+    <div th:replace="~{fragments :: header}"></div>
+    <h1>Job Listings</h1>
+    <ul>
+        <li th:each="jobPosting : ${jobPostings}">
+            <h2 th:text="${jobPosting.jobTitle}"></h2>
+            <p th:text="${jobPosting.location}"></p>
+            <p th:text="${jobPosting.salary}"></p>
+            <p th:text="${jobPosting.description}"></p>
+            <a th:href="@{/candidate/apply(id=${jobPosting.id})}">Apply</a>
+        </li>
+    </ul>
+</body>
+</html>

@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Edit Job Posting</title>
+    <link rel="stylesheet" th:href="@{/css/styles.css}">
+</head>
+<body>
+    <div th:replace="~{fragments :: header}"></div>
+    <h1>Edit Job Posting</h1>
+    <form th:action="@{/employer/job-posting}" th:object="${jobPosting}" method="post">
+        <input type="hidden" th:field="*{id}">
+       <!-- Job Description fields -->
+	    <label for="jobTitle">Job Title:</label>
+	    <input type="text" id="jobTitle" th:field="*{jobTitle}" readonly>
+        <label for="location">Location:</label>
+        <input type="text" id="location" th:field="*{location}" required>
+        <label for="salary">Salary:</label>
+        <input type="number" id="salary" th:field="*{salary}" required>
+        <label for="description">Job Description:</label>
+        <textarea id="description" th:field="*{description}" required></textarea>
+        <h3>R1 Check Form</h3>
+	    <div th:each="question, iter : *{r1CheckQuestions}">
+	        <p th:text="${question.question}"></p>
+	        <p th:if="${question.correctAnswer}">Correct Answer: Yes</p>
+	        <p th:unless="${question.correctAnswer}">Correct Answer: No</p>
+	    </div>
+	    
+        <h3>R2 Check Form</h3>
+		<div th:each="question, iter : ${r2CheckQuestions}">
+		    <label th:for="${'r2_' + iter.index}">Question:</label>
+		    <input type="text" th:id="${'r2_' + iter.index}" th:name="${'r2CheckQuestions[' + iter.index + '].question'}" required>
+		</div>
+		<button type="submit">Approve Job Posting</button>
+    </form>
+    <script th:src="@{/js/script.js}"></script>
+</body>
+</html>

@@ -1,0 +1,28 @@
+ <!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Apply for Job</title>
+    <link rel="stylesheet" th:href="@{/css/styles.css}">
+</head>
+<body>
+    <div th:replace="~{fragments :: header}"></div>
+    <h1>Apply for Job</h1>
+    <h2 th:text="${jobPosting.jobTitle}"></h2>
+    <p th:text="${jobPosting.location}"></p>
+    <p th:text="${jobPosting.salary}"></p>
+    <p th:text="${jobPosting.description}"></p>
+    <form th:action="@{/candidate/apply}" method="post" enctype="multipart/form-data">
+        <label for="resume">Upload Resume:</label>
+        <input type="file" id="resume" name="resume" required>
+        <h3>R1 Check Form</h3>
+        <ul th:each="question : ${jobPosting.r1CheckQuestions}">
+            <li th:text="${question.question}">
+                <input type="radio" th:name="${'r1_' + question.id}" value="true" required> Yes
+                <input type="radio" th:name="${'r1_' + question.id}" value="false" required> No
+            </li>
+        </ul>
+        <button type="submit">Submit Application</button>
+    </form>
+</body>
+</html>
