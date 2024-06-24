@@ -15,6 +15,7 @@ public class Question {
 
     private String question;
     private Boolean correctAnswer;
+    
 	public Long getId() {
 		return id;
 	}
@@ -32,6 +33,9 @@ public class Question {
 	}
 	public void setCorrectAnswer(Boolean correctAnswer) {
 		this.correctAnswer = correctAnswer;
+	}
+	public Question() {
+	    
 	}
 	public Question(Long id, String question, Boolean correctAnswer) {
 		super();

@@ -1,58 +1,41 @@
-// script.js
+let r1QuestionCount = 0;
+
 function addR1Question() {
-    const form = document.querySelector('form');
-    const questionContainer = document.createElement('div');
-
-    const questionLabel = document.createElement('label');
-    questionLabel.textContent = 'Question:';
-    const questionInput = document.createElement('input');
-    questionInput.type = 'text';
-    questionInput.required = true;
-    questionInput.name = `r1CheckQuestions[${form.querySelectorAll('div').length}].question`;
-
-    const answerLabel = document.createElement('label');
-    answerLabel.textContent = 'Correct Answer:';
-
-    const yesRadio = document.createElement('input');
-    yesRadio.type = 'radio';
-    yesRadio.name = `r1CheckQuestions[${form.querySelectorAll('div').length}].correctAnswer`;
-    yesRadio.value = 'true';
-
-    const yesLabel = document.createElement('label');
-    yesLabel.textContent = 'Yes';
-
-    const noRadio = document.createElement('input');
-    noRadio.type = 'radio';
-    noRadio.name = `r1CheckQuestions[${form.querySelectorAll('div').length}].correctAnswer`;
-    noRadio.value = 'false';
-
-    const noLabel = document.createElement('label');
-    noLabel.textContent = 'No';
-
-    questionContainer.appendChild(questionLabel);
-    questionContainer.appendChild(questionInput);
-    questionContainer.appendChild(answerLabel);
-    questionContainer.appendChild(yesRadio);
-    questionContainer.appendChild(yesLabel);
-    questionContainer.appendChild(noRadio);
-    questionContainer.appendChild(noLabel);
-
-    form.insertBefore(questionContainer, form.lastElementChild);
+    const container = document.getElementById('r1QuestionsContainer');
+    const questionDiv = document.createElement('div');
+    questionDiv.className = 'r1-question';
+    
+    questionDiv.innerHTML = `
+        <label for="r1Question${r1QuestionCount}">Question:</label>
+        <input type="text" id="r1Question${r1QuestionCount}" name="r1Questions" required>
+        
+        <label>Correct Answer:</label>
+        <input type="radio" name="r1Answers[${r1QuestionCount}]" value="true" required> Yes
+        <input type="radio" name="r1Answers[${r1QuestionCount}]" value="false" required> No
+    `;
+    
+    container.appendChild(questionDiv);
+    r1QuestionCount++;
 }
 
-function addR2Question() {
-    const form = document.querySelector('form');
-    const questionContainer = document.createElement('div');
+// You can add more functions here if needed, for example:
 
-    const questionLabel = document.createElement('label');
-    questionLabel.textContent = 'Question:';
-    const questionInput = document.createElement('input');
-    questionInput.type = 'text';
-    questionInput.required = true;
-    questionInput.name = `r2CheckQuestions[${form.querySelectorAll('div').length}].question`;
-
-    questionContainer.appendChild(questionLabel);
-    questionContainer.appendChild(questionInput);
-
-    form.insertBefore(questionContainer, form.lastElementChild);
+function validateForm() {
+    // Add any form validation logic here
+    return true; // Return false if validation fails
 }
+
+// Add event listener when the DOM is fully loaded
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.querySelector('form');
+    if (form) {
+        form.addEventListener('submit', function(event) {
+            if (!validateForm()) {
+                event.preventDefault(); // Prevent form submission if validation fails
+            }
+        });
+    }
+
+    // Add initial R1 question if needed
+    addR1Question();
+});

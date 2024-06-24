@@ -4,19 +4,21 @@
     <title>Login Page</title>
 </head>
 <body>
-	<div th:replace="~{fragments :: header}">
-		 
-	</div>
+    <div th:replace="~{fragments :: header}"></div>
+    <h1>Welcome To Login Page</h1>
     <div th:if="${param.error}">
         <p>Invalid username or password.</p>
     </div>
-    <h1>Welcome To Login Page</h1>
+    <div th:if="${param.logout}">
+        <p>You have been logged out.</p>
+    </div>
     <form th:action="@{/login}" method="post">
         <label for="username">Username:</label>
-        <input type="text" id="username" name="username" />
+        <input type="text" id="username" name="username" required />
         <label for="password">Password:</label>
-        <input type="password" id="password" name="password" />
+        <input type="password" id="password" name="password" required />
         <button type="submit">Login</button>
     </form>
+    <p>Don't have an account? <a th:href="@{/register}">Register here</a></p>
 </body>
 </html>

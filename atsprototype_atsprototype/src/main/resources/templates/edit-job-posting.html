@@ -4,34 +4,54 @@
     <meta charset="UTF-8">
     <title>Edit Job Posting</title>
     <link rel="stylesheet" th:href="@{/css/styles.css}">
+    <script>
+        function addR1Question() {
+            var container = document.getElementById("r1QuestionsContainer");
+            var newQuestionDiv = document.createElement("div");
+            var index = container.children.length;
+            newQuestionDiv.innerHTML = `
+                <input type="text" name="r1Questions[${index}]" placeholder="Question" required>
+                <select name="r1Answers[${index}]">
+                    <option value="true">Yes</option>
+                    <option value="false">No</option>
+                </select>
+                <button type="button" onclick="this.parentElement.remove()">Remove</button>
+            `;
+            container.appendChild(newQuestionDiv);
+        }
+    </script>
 </head>
 <body>
     <div th:replace="~{fragments :: header}"></div>
     <h1>Edit Job Posting</h1>
-    <form th:action="@{/employer/job-posting}" th:object="${jobPosting}" method="post">
-        <input type="hidden" th:field="*{id}">
-       <!-- Job Description fields -->
-	    <label for="jobTitle">Job Title:</label>
-	    <input type="text" id="jobTitle" th:field="*{jobTitle}" readonly>
+      
+    <form th:action="@{/employer/job-posting/{id}/edit(id=${jobPosting.id})}" th:object="${jobPosting}" method="post">
+        <label for="jobTitle">Job Title:</label>
+        <input type="text" id="jobTitle" th:field="*{jobTitle}" required>
+        
         <label for="location">Location:</label>
         <input type="text" id="location" th:field="*{location}" required>
+        
         <label for="salary">Salary:</label>
         <input type="number" id="salary" th:field="*{salary}" required>
+        
         <label for="description">Job Description:</label>
         <textarea id="description" th:field="*{description}" required></textarea>
-        <h3>R1 Check Form</h3>
-	    <div th:each="question, iter : *{r1CheckQuestions}">
-	        <p th:text="${question.question}"></p>
-	        <p th:if="${question.correctAnswer}">Correct Answer: Yes</p>
-	        <p th:unless="${question.correctAnswer}">Correct Answer: No</p>
-	    </div>
-	    
-        <h3>R2 Check Form</h3>
-		<div th:each="question, iter : ${r2CheckQuestions}">
-		    <label th:for="${'r2_' + iter.index}">Question:</label>
-		    <input type="text" th:id="${'r2_' + iter.index}" th:name="${'r2CheckQuestions[' + iter.index + '].question'}" required>
-		</div>
-		<button type="submit">Approve Job Posting</button>
+        
+        <h3>R1 Check Questions</h3>
+        <div id="r1QuestionsContainer">
+            <div th:each="question, stat : *{r1CheckQuestions}">
+                <input type="text" th:field="*{r1CheckQuestions[__${stat.index}__].question}" required>
+                <select th:field="*{r1CheckQuestions[__${stat.index}__].correctAnswer}">
+                    <option value="true">Yes</option>
+                    <option value="false">No</option>
+                </select>
+                <button type="button" onclick="this.parentElement.remove()">Remove</button>
+            </div>
+        </div>
+        <button type="button" onclick="addR1Question()">Add R1 Question</button>
+        
+        <button type="submit">Update Job Posting</button>
     </form>
     <script th:src="@{/js/script.js}"></script>
 </body>

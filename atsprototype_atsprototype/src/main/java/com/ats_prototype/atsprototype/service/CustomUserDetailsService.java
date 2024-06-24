@@ -2,15 +2,12 @@ package com.ats_prototype.atsprototype.service;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.web.servlet.view.RedirectView;
 
 import com.ats_prototype.atsprototype.entity.Candidate;
 import com.ats_prototype.atsprototype.entity.Coordinator;
@@ -32,7 +29,10 @@ public class CustomUserDetailsService implements UserDetailsService {
     private final RecruiterRepository recruiterRepository;
     private final CoordinatorRepository coordinatorRepository;
 
-    public CustomUserDetailsService(CandidateRepository candidateRepository, EmployerRepository employerRepository, RecruiterRepository recruiterRepository, CoordinatorRepository coordinatorRepository) {
+    public CustomUserDetailsService(CandidateRepository candidateRepository,
+                                    EmployerRepository employerRepository,
+                                    RecruiterRepository recruiterRepository,
+                                    CoordinatorRepository coordinatorRepository) {
         this.candidateRepository = candidateRepository;
         this.employerRepository = employerRepository;
         this.recruiterRepository = recruiterRepository;
@@ -41,38 +41,47 @@ public class CustomUserDetailsService implements UserDetailsService {
     
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
+        logger.debug("Attempting to load user by email: {}", email);
+
+        UserDetails userDetails = loadCandidate(email);
+        if (userDetails == null) userDetails = loadEmployer(email);
+        if (userDetails == null) userDetails = loadRecruiter(email);
+        if (userDetails == null) userDetails = loadCoordinator(email);
+
+        if (userDetails == null) {
+            logger.warn("User not found with email: {}", email);
+            throw new UsernameNotFoundException("User not found with email: " + email);
+        }
+
+        logger.debug("User loaded successfully: {}", email);
+        return userDetails;
+    }
+
+    private UserDetails loadCandidate(String email) {
         Candidate candidate = candidateRepository.findByEmail(email);
-        if (candidate != null) {
-            return new org.springframework.security.core.userdetails.User(
-                candidate.getEmail(), "{noop}" + candidate.getPassword(),
-                Collections.singletonList(new SimpleGrantedAuthority("ROLE_CANDIDATE"))
-            );
-        }
+        return candidate != null ? createUserDetails(candidate.getEmail(), candidate.getPassword(), "ROLE_CANDIDATE") : null;
+    }
 
+    private UserDetails loadEmployer(String email) {
         Employer employer = employerRepository.findByEmail(email);
-        if (employer != null) {
-            return new org.springframework.security.core.userdetails.User(
-                employer.getEmail(), "{noop}" + employer.getPassword(),
-                Collections.singletonList(new SimpleGrantedAuthority("ROLE_EMPLOYER"))
-            );
-        }
+        return employer != null ? createUserDetails(employer.getEmail(), employer.getPassword(), "ROLE_EMPLOYER") : null;
+    }
 
+    private UserDetails loadRecruiter(String email) {
         Recruiter recruiter = recruiterRepository.findByEmail(email);
-        if (recruiter != null) {
-            return new org.springframework.security.core.userdetails.User(
-                recruiter.getEmail(), "{noop}" + recruiter.getPassword(),
-                Collections.singletonList(new SimpleGrantedAuthority("ROLE_RECRUITER"))
-            );
-        }
+        return recruiter != null ? createUserDetails(recruiter.getEmail(), recruiter.getPassword(), "ROLE_RECRUITER") : null;
+    }
 
+    private UserDetails loadCoordinator(String email) {
         Coordinator coordinator = coordinatorRepository.findByEmail(email);
-        if (coordinator != null) {
-            return new org.springframework.security.core.userdetails.User(
-                coordinator.getEmail(), "{noop}" + coordinator.getPassword(),
-                Collections.singletonList(new SimpleGrantedAuthority("ROLE_COORDINATOR"))
-            );
-        }
+        return coordinator != null ? createUserDetails(coordinator.getEmail(), coordinator.getPassword(), "ROLE_COORDINATOR") : null;
+    }
 
-        throw new UsernameNotFoundException("User not found with email: " + email);
+    private UserDetails createUserDetails(String email, String password, String role) {
+        return User.builder()
+                .username(email)
+                .password(password)
+                .authorities(Collections.singletonList(new SimpleGrantedAuthority(role)))
+                .build();
     }
 }

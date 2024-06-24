@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>R2 Check and Shortlist</title>
+</head>
+<body>
+    <h1>R2 Check and Shortlist</h1>
+    <form th:action="@{/recruiter/review}" method="post">
+        <input type="hidden" name="applicationId" th:value="${application.id}">
+        
+        <h2>Candidate Information</h2>
+        <p>Name: <span th:text="${application.candidate.name}"></span></p>
+        <p>Job: <span th:text="${application.jobPosting.title}"></span></p>
+        
+        <h2>R2 Check Questions</h2>
+        <div th:each="question, iterStat : ${application.jobPosting.r2CheckQuestions}">
+            <label th:for="'r2_' + ${iterStat.index}" th:text="${question}"></label>
+            <input th:id="'r2_' + ${iterStat.index}" type="text" th:name="'r2Responses[' + ${question} + ']'" required>
+        </div>
+        
+        <h2>Shortlist Decision</h2>
+        <input type="checkbox" id="shortlist" name="shortlist" value="true">
+        <label for="shortlist">Shortlist this candidate</label>
+        
+        <button type="submit">Submit R2 Check and Shortlist Decision</button>
+    </form>
+</body>
+</html>

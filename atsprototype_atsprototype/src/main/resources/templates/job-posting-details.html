@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Job Posting Details</title>
+</head>
+<body>
+    <h1 th:text="${jobPosting.jobTitle}"></h1>
+    <p>Employer: <span th:text="${jobPosting.employer.companyName}"></span></p>
+    <p>Location: <span th:text="${jobPosting.location}"></span></p>
+    <p>Salary: <span th:text="${jobPosting.salary}"></span></p>
+    <p>Description: <span th:text="${jobPosting.description}"></span></p>
+
+    <h2>Assign Recruiter</h2>
+    <form th:action="@{/coordinator/assign-recruiter}" method="post">
+        <input type="hidden" name="jobPostingId" th:value="${jobPosting.id}">
+        <select name="recruiterId">
+            <option th:each="recruiter : ${recruiters}" th:value="${recruiter.id}" th:text="${recruiter.name}"></option>
+        </select>
+        <button type="submit">Assign Recruiter</button>
+    </form>
+
+    <h2>Add R2 Check Questions</h2>
+    <form th:action="@{/coordinator/add-r2-check}" method="post">
+        <input type="hidden" name="jobPostingId" th:value="${jobPosting.id}">
+        <div id="r2QuestionsContainer">
+            <input type="text" name="r2Questions" placeholder="Question" required>
+        </div>
+        <button type="button" onclick="addR2Question()">Add Question</button>
+        <button type="submit">Save R2 Check</button>
+    </form>
+
+    <script>
+        function addR2Question() {
+            var container = document.getElementById("r2QuestionsContainer");
+            var input = document.createElement("input");
+            input.type = "text";
+            input.name = "r2Questions";
+            input.placeholder = "Question";
+            input.required = true;
+            container.appendChild(input);
+        }
+    </script>
+</body>
+</html>

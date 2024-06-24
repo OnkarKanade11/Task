@@ -1,35 +1,47 @@
 package com.ats_prototype.atsprototype.service;
 
 import java.util.List;
+import java.util.Map;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.security.crypto.password.PasswordEncoder;
+ 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.ats_prototype.atsprototype.entity.Candidate;
-import com.ats_prototype.atsprototype.entity.Employer;
+import com.ats_prototype.atsprototype.entity.JobApplication;
 import com.ats_prototype.atsprototype.repository.CandidateRepository;
+import com.ats_prototype.atsprototype.repository.JobApplicationRepository;
+import com.ats_prototype.atsprototype.repository.JobPostingRepository;
 
 @Service
 public class CandidateService {
-
-	private final CandidateRepository candidateRepository;
-    private static final Logger logger = LoggerFactory.getLogger(CandidateService.class);
-
-    public CandidateService(CandidateRepository candidateRepository) {
-        this.candidateRepository = candidateRepository;
-    }
-
-    public void registerCandidate(Candidate candidate) {
-        candidateRepository.save(candidate);
-    }
+    @Autowired
+    private CandidateRepository candidateRepository;
+    @Autowired
+    private JobApplicationRepository jobApplicationRepository;
+    @Autowired
+    private JobPostingRepository jobPostingRepository;
 
     public Candidate findCandidateByEmail(String email) {
         return candidateRepository.findByEmail(email);
     }
-    
-    public List<Candidate> getShortlistedCandidatesByEmployer(Employer employer) {
-        return candidateRepository.findShortlistedCandidatesByEmployer(employer);
+
+    public void uploadResume(Long candidateId, byte[] resumeData) {
+        Candidate candidate = candidateRepository.findById(candidateId).orElseThrow(() -> new RuntimeException("Candidate not found"));
+        candidate.setResume(resumeData);
+        candidateRepository.save(candidate);
+    }
+
+    public void applyForJob(Long candidateId, Long jobPostingId, Map<String, String> r1CheckResponses) {
+        JobApplication application = new JobApplication();
+        application.setCandidate(candidateRepository.findById(candidateId).orElseThrow());
+        application.setJobPosting(jobPostingRepository.findById(jobPostingId).orElseThrow());
+        application.setStatus("Applied");
+        application.setR1CheckResponses(r1CheckResponses);
+        jobApplicationRepository.save(application);
+    }
+
+    public List<JobApplication> getCandidateApplications(Long candidateId) {
+        return jobApplicationRepository.findByCandidateId(candidateId);
     }
 }

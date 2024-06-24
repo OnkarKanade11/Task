@@ -16,7 +16,8 @@ public class EmployerService {
     }
 
     public void registerEmployer(Employer employer) {
-        employerRepository.save(employer);
+    	 employer.setRole("ROLE_EMPLOYER");
+    	 employerRepository.save(employer);
     }
 
     public Employer getEmployerByEmail(String email) {

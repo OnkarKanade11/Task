@@ -8,8 +8,33 @@
 <body>
     <div th:replace="~{fragments :: header}"></div>
     <h1>Candidate Dashboard</h1>
-    <a href="/ATS.in/candidate/jobs/job-listing">View Job Listings</a>
-    <h2>Application History</h2>
-    <!-- Display application history -->
+    <a th:href="@{/candidate/jobs/job-listing}">View Job Listings</a>
+    <h2>Job Openings</h2>
+    <table>
+        <tr>
+            <th>Job Title</th>
+            <th>Company</th>
+            <th>Action</th>
+        </tr>
+        <tr th:each="job : ${jobOpenings}">
+            <td th:text="${job.title}"></td>
+            <td th:text="${job.employer.name}"></td>
+            <td><a th:href="@{/candidate/apply/{id}(id=${job.id})}">Apply</a></td>
+        </tr>
+    </table>
+
+    <h2>Your Applications</h2>
+    <table>
+        <tr>
+            <th>Job Title</th>
+            <th>Company</th>
+            <th>Status</th>
+        </tr>
+        <tr th:each="application : ${applications}">
+            <td th:text="${application.jobPosting.title}"></td>
+            <td th:text="${application.employer.name}"></td>
+            <td th:text="${application.status}"></td>
+        </tr>
+    </table>
 </body>
 </html>

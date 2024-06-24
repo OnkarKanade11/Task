@@ -1,14 +1,27 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-    <meta charset="UTF-8">
     <title>Recruiter Dashboard</title>
-    <link rel="stylesheet" th:href="@{/css/styles.css}">
 </head>
 <body>
-    <div th:replace="~{fragments :: header}"></div>
     <h1>Recruiter Dashboard</h1>
-    <h2>Applications to Review</h2>
-    <!-- Display list of applications to review -->
+    <div th:if="${application}">
+        <h2>Application for Review</h2>
+        <p>Candidate: <span th:text="${application.candidate.name}"></span></p>
+        <p>Job: <span th:text="${application.jobPosting.title}"></span></p>
+        <h3>R1 Check Responses</h3>
+        <ul>
+            <li th:each="response : ${application.r1CheckResponses}">
+                <span th:text="${response.key}"></span>: <span th:text="${response.value}"></span>
+            </li>
+        </ul>
+        <form th:action="@{/recruiter/shortlist}" method="post">
+            <input type="hidden" name="applicationId" th:value="${application.id}">
+            <button type="submit">Shortlist Candidate</button>
+        </form>
+    </div>
+    <div th:unless="${application}">
+        <p>No applications to review at this time.</p>
+    </div>
 </body>
 </html>

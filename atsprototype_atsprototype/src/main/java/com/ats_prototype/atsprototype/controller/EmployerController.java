@@ -5,12 +5,15 @@ import java.security.Principal;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import com.ats_prototype.atsprototype.entity.Candidate;
 import com.ats_prototype.atsprototype.entity.Employer;
@@ -24,60 +27,82 @@ import com.ats_prototype.atsprototype.service.JobPostingService;
 @RequestMapping("/employer")
 public class EmployerController {
 
- private final EmployerService employerService;
- private final JobPostingService jobPostingService;
- private final CandidateService candidateService;
+    private final EmployerService employerService;
+    private final JobPostingService jobPostingService;
 
- public EmployerController(EmployerService employerService, JobPostingService jobPostingService, CandidateService candidateService) {
-     this.employerService = employerService;
-     this.jobPostingService = jobPostingService;
-     this.candidateService = candidateService;
- }
+    @Autowired
+    public EmployerController(EmployerService employerService, JobPostingService jobPostingService) {
+        this.employerService = employerService;
+        this.jobPostingService = jobPostingService;
+    }
 
- @GetMapping("/dashboard")
- public String showEmployerDashboard(Model model, Principal principal) {
-     // Get the logged-in employer's email from the Principal
-     String employerEmail = principal.getName();
+    @GetMapping("/dashboard")
+    public String showEmployerDashboard(Model model, Principal principal) {
+        String employerEmail = principal.getName();
+        Employer employer = employerService.getEmployerByEmail(employerEmail);
+        model.addAttribute("employer", employer);
 
-     // Fetch the employer object from the database
-     Employer employer = employerService.getEmployerByEmail(employerEmail);
+        List<JobPosting> jobPostings = jobPostingService.getJobPostingsByEmployer(employer);
+        model.addAttribute("jobPostings", jobPostings);
 
-     // Fetch all job postings created by the employer
-     List<JobPosting> jobPostings = jobPostingService.getJobPostingsByEmployer(employer);
-     model.addAttribute("jobPostings", jobPostings);
+        return "employer-dashboard";
+    }
 
-  // Fetch shortlisted candidates for the employer
-     List<Candidate> shortlistedCandidates = candidateService.getShortlistedCandidatesByEmployer(employer);
-     model.addAttribute("shortlistedCandidates", shortlistedCandidates);
-     
-     return "employer-dashboard";
- }
+    @GetMapping("/job-posting")
+    public String showJobPostingForm(Model model) {
+        JobPosting jobPosting = new JobPosting();
+        model.addAttribute("jobPosting", jobPosting);
+        return "create-job-posting";
+    }
 
-	 @GetMapping("/job-posting")
-	 public String showJobPostingForm(Model model) {
-	     JobPosting jobPosting = new JobPosting(null, null, null, null, null, null, null, null, null);
-	     List<Question> r1CheckQuestions = new ArrayList<>();
-	     for (int i = 0; i < 5; i++) {
-	         r1CheckQuestions.add(new Question(null, null, null));
-	     }
-	     jobPosting.setR1CheckQuestions(r1CheckQuestions);
-	     model.addAttribute("jobPosting", jobPosting);
-	     return "edit-job-posting";
-	 }
-	
-	 @PostMapping("/job-posting")
-	 public String createJobPosting(@ModelAttribute("jobPosting") JobPosting jobPosting) {
-	     // Set the employer for the job posting (assuming you have a logged-in employer)
-	     Employer employer = new Employer(null, null, null, null, null); // Replace with the actual logged-in employer object
-	     jobPosting.setEmployer(employer);
-	
-	     // Save the job posting to the database
-	     jobPostingService.createJobPosting(jobPosting);
-	
-	     // Redirect to the employer dashboard or a success page
-	     return "redirect:/employer/dashboard";
-	 }
+    @PostMapping("/job-posting")
+    public String createJobPosting(@ModelAttribute JobPosting jobPosting,
+                                   @RequestParam(value = "r1Questions", required = false) List<String> r1Questions,
+                                   @RequestParam(value = "r1Answers", required = false) List<Boolean> r1Answers,
+                                   Principal principal) {
+        String employerEmail = principal.getName();
+        Employer employer = employerService.getEmployerByEmail(employerEmail);
+        jobPosting.setEmployer(employer);
 
+        // Add R1 check questions
+        if (r1Questions != null && r1Answers != null && r1Questions.size() == r1Answers.size()) {
+            for (int i = 0; i < r1Questions.size(); i++) {
+                Question question = new Question();
+                question.setQuestion(r1Questions.get(i));
+                question.setCorrectAnswer(r1Answers.get(i));
+                jobPosting.addR1CheckQuestion(question);
+            }
+        }
 
- // Other methods for managing job postings and reviewing shortlisted candidates
+        jobPostingService.createJobPosting(jobPosting);
+        
+        return "redirect:/employer/dashboard";
+    }
+    
+    @GetMapping("/job-posting/{id}")
+    public String viewJobPostingDetails(@PathVariable Long id, Model model) {
+        JobPosting jobPosting = jobPostingService.getJobPostingById(id);
+        model.addAttribute("jobPosting", jobPosting);
+        return "job-posting-details";
+    }
+    
+    @GetMapping("/job-posting/{id}/edit")
+    public String showEditJobPostingForm(@PathVariable Long id, Model model) {
+        JobPosting jobPosting = jobPostingService.getJobPostingById(id);
+        model.addAttribute("jobPosting", jobPosting);
+        return "edit-job-posting";
+    }
+
+    @PostMapping("/job-posting/{id}/edit")
+    public String updateJobPosting(@PathVariable Long id, @ModelAttribute JobPosting updatedJobPosting) {
+        JobPosting existingJobPosting = jobPostingService.getJobPostingById(id);
+        existingJobPosting.setJobTitle(updatedJobPosting.getJobTitle());
+        existingJobPosting.setLocation(updatedJobPosting.getLocation());
+        existingJobPosting.setSalary(updatedJobPosting.getSalary());
+        existingJobPosting.setDescription(updatedJobPosting.getDescription());
+        
+        jobPostingService.updateJobPosting(existingJobPosting);
+        
+        return "redirect:/employer/job-posting/" + id;
+    }
 }

@@ -1,6 +1,8 @@
 package com.ats_prototype.atsprototype.service;
 
  
+import java.util.List;
+
 import org.springframework.stereotype.Service;
 
 import com.ats_prototype.atsprototype.entity.Recruiter;
@@ -16,8 +18,12 @@ public class RecruiterService {
     }
 
     public void registerRecruiter(Recruiter recruiter) {
+    	recruiter.setRole("ROLE_RECRUITER");
         recruiterRepository.save(recruiter);
     }
 
+    public List<Recruiter> getAllRecruiters() {
+        return recruiterRepository.findAll();
+    }
  // Other methods for managing recruiter-related operations
 }

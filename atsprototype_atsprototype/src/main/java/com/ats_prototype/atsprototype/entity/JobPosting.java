@@ -1,5 +1,6 @@
 package com.ats_prototype.atsprototype.entity;
 
+import java.util.ArrayList;
 import java.util.List;
 
  
@@ -25,10 +26,10 @@ public class JobPosting {
 	private String description;
 
 	@OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
-	private List<Question> r1CheckQuestions;
+	private List<Question> r1CheckQuestions = new ArrayList<>();
 
 	@OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
-	private List<Question> r2CheckQuestions;
+	private List<Question> r2CheckQuestions = new ArrayList<>();
 
 	@ManyToOne
 	private Employer employer;
@@ -108,21 +109,25 @@ public class JobPosting {
 		this.recruiter = recruiter;
 	}
 
-	public JobPosting(Long id, String jobTitle, String location, Double salary, String description,
-			List<Question> r1CheckQuestions, List<Question> r2CheckQuestions, Employer employer, Recruiter recruiter) {
-		super();
-		this.id = id;
-		this.jobTitle = jobTitle;
-		this.location = location;
-		this.salary = salary;
-		this.description = description;
-		this.r1CheckQuestions = r1CheckQuestions;
-		this.r2CheckQuestions = r2CheckQuestions;
-		this.employer = employer;
-		this.recruiter = recruiter;
+	public JobPosting(){
+		
+	}
+	public JobPosting(String jobTitle, String location, Double salary, String description, Employer employer) {
+	    this.jobTitle = jobTitle;
+	    this.location = location;
+	    this.salary = salary;
+	    this.description = description;
+	    this.employer = employer;
+	     
 	}
 	
-	
+	public void addR1CheckQuestion(Question question) {
+        r1CheckQuestions.add(question);
+    }
+
+    public void addR2CheckQuestion(Question question) {
+        r2CheckQuestions.add(question);
+    }
 	
 
 }
